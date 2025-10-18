@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formula Student Task Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Color Palette */
+            --bg-main: #f8f9fa;
+            --text-primary: #2c3e50;
+            --text-secondary: #7f8c8d;
+            --accent: #3498db;
+            --white: #ffffff;
+            --border-light: #e0e0e0;
+            --hover-blue: #f0f7ff;
+            
+            /* Block Colors */
+            --bloco1-bg: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+            --bloco2-bg: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
+            --bloco3-bg: linear-gradient(135deg, #F3E5F5 0%, #E1BEE7 100%);
+            --bloco4-bg: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%);
+            --bloco5-bg: linear-gradient(135deg, #E0F2F1 0%, #B2DFDB 100%);
+            --bloco6-bg: linear-gradient(135deg, #FCE4EC 0%, #F8BBD0 100%);
+            
+            /* Spacing */
+            --padding-sm: 8px;
+            --padding-md: 16px;
+            --padding-lg: 24px;
+            --padding-xl: 32px;
+            --margin-sm: 8px;
+            --margin-md: 16px;
+            --margin-lg: 24px;
+            
+            /* Border Radius */
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-pill: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: var(--padding-xl) var(--padding-md);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: var(--margin-lg);
+        }
+
+        .header h1 {
+            font-weight: 700;
+            font-size: 32px;
+            margin-bottom: var(--margin-sm);
+            letter-spacing: -0.5px;
+        }
+
+        .header p {
+            font-weight: 400;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--padding-md);
+        }
+
+        .blocos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: var(--margin-lg);
+            margin-bottom: var(--margin-xl);
+        }
+
+        .bloco-card {
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .bloco-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+        }
+
+        .bloco-header {
+            padding: var(--padding-lg);
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .bloco-header:hover {
+            background: rgba(0,0,0,0.02);
+        }
+
+        .bloco-1 .bloco-header { background: var(--bloco1-bg); }
+        .bloco-2 .bloco-header { background: var(--bloco2-bg); }
+        .bloco-3 .bloco-header { background: var(--bloco3-bg); }
+        .bloco-4 .bloco-header { background: var(--bloco4-bg); }
+        .bloco-5 .bloco-header { background: var(--bloco5-bg); }
+        .bloco-6 .bloco-header { background: var(--bloco6-bg); }
+
+        .bloco-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .bloco-title h2 {
+            font-weight: 600;
+            font-size: 22px;
+            margin: 0;
+        }
+
+        .bloco-toggle {
+            font-size: 18px;
+            transition: transform 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .bloco-progress {
+            margin-top: var(--margin-sm);
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 3px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--accent);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .bloco-content {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .bloco-content.collapsed {
+            height: 0;
+        }
+
+        .bloco-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .dia {
+            padding: var(--padding-md) var(--padding-lg);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .dia:last-child {
+            border-bottom: none;
+        }
+
+        .dia-nome {
+            font-weight: 500;
+            font-size: 16px;
+            margin-bottom: var(--margin-md);
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+        }
+
+        .dia-nome.pitstop {
+            color: #e67e22;
+            font-weight: 600;
+        }
+
+        .tarefas-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--margin-sm);
+        }
+
+        .tarefa {
+            display: inline-flex;
+            align-items: center;
+            background: var(--white);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-pill);
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 400;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+
+        .tarefa:hover {
+            background: var(--hover-blue);
+            border-color: var(--accent);
+            transform: translateY(-1px);
+        }
+
+        .tarefa.completed {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+
+        .tarefa input[type="checkbox"] {
+            margin-right: 6px;
+            cursor: pointer;
+            transform: scale(1.1);
+        }
+
+        .tarefa-text {
+            font-family: 'Montserrat', monospace;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .blocos-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 24px;
+            }
+            
+            .container {
+                padding: 0 var(--padding-sm);
+            }
+            
+            .bloco-header {
+                padding: var(--padding-md);
+            }
+            
+            .dia {
+                padding: var(--padding-sm) var(--padding-md);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tarefas-container {
+                gap: 4px;
+            }
+            
+            .tarefa {
+                padding: 4px 8px;
+                font-size: 12px;
+            }
+        }
+
+        /* Animation for new completions */
+        .tarefa.just-completed {
+            animation: completeTask 0.4s ease;
+        }
+
+        @keyframes completeTask {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); background: #d4edda; }
+            100% { transform: scale(1); }
+        }
+
+        .stats {
+            background: white;
+            padding: var(--padding-lg);
+            margin: var(--margin-lg) 0;
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+
+        .stats h3 {
+            margin-bottom: var(--margin-md);
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: var(--margin-md);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1>Formula Student Task Tracker</h1>
+            <p>Organize suas tarefas em 6 blocos e acompanhe seu progresso</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="stats">
+            <h3>Estatísticas Gerais</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-number" id="total-tasks">158</div>
+                    <div class="stat-label">Total de Tarefas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completed-tasks">0</div>
+                    <div class="stat-label">Concluídas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="remaining-tasks">158</div>
+                    <div class="stat-label">Restantes</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number" id="completion-percentage">0%</div>
+                    <div class="stat-label">Progresso</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="blocos-grid" id="blocos-container">
+            <!-- Blocos will be dynamically generated here -->
+        </div>
+    </div>
+
+    <script>
+        // Application data
+        const appData = {
+            blocos: [
+                {
+                    bloco: "Bloco 1",
+                    dias: [
+                        { nome: "Dia 01", tarefas: ["#F001", "#F002", "#F003"] },
+                        { nome: "Dia 02", tarefas: ["#F004", "#F005", "#F006", "#F007", "#F008"] },
+                        { nome: "Dia 03", tarefas: ["#F009", "#F010", "#F011"] },
+                        { nome: "Dia 04", tarefas: ["#F012", "#F013", "#F014", "#F015"] },
+                        { nome: "Dia 05", tarefas: ["#F016", "#F017", "#F018", "#F019", "#F020"] },
+                        { nome: "Dia 06", tarefas: ["#F021", "#F022", "#F023", "#F024"] },
+                        { nome: "Dia 07", tarefas: ["#F025", "#F026", "#F027", "#F028", "#F029"] }
+                    ]
+                },
+                {
+                    bloco: "Bloco 2",
+                    dias: [
+                        { nome: "Dia 08", tarefas: ["#F030", "#F031", "#F032"] },
+                        { nome: "Dia 09", tarefas: ["#F033", "#F034", "#F035", "#F036"] },
+                        { nome: "Dia 10", tarefas: ["#F037", "#F038", "#F039", "#F040", "#F041", "#F042"] },
+                        { nome: "Dia 11", tarefas: ["#F043", "#F044"] },
+                        { nome: "Dia 12", tarefas: ["#F045", "#F046", "#F047"] },
+                        { nome: "Dia 13", tarefas: ["#F048", "#F049", "#F050"] },
+                        { nome: "Dia 14", tarefas: ["#F051", "#F052", "#F053", "#F054", "#F055"] }
+                    ]
+                },
+                {
+                    bloco: "Bloco 3",
+                    dias: [
+                        { nome: "Dia 15", tarefas: ["#F056", "#F057", "#F058", "#F059", "#F060"] },
+                        { nome: "Dia 16", tarefas: ["#F061", "#F062", "#F063", "#F064", "#F065"] },
+                        { nome: "Dia 17", tarefas: ["#F066", "#F067", "#F068", "#F069", "#F070"] },
+                        { nome: "Dia 18", tarefas: ["#F071", "#F072", "#F073", "#F074", "#F075"] },
+                        { nome: "Dia 19", tarefas: ["#F076", "#F077", "#F078", "#F079", "#F080"] },
+                        { nome: "Dia 20", tarefas: ["#F081", "#F082", "#F083", "#F084", "#F085", "#F086"] },
+                        { nome: "Dia 21", tarefas: ["#F087", "#F088", "#F089", "#F090", "#F091"] }
+                    ]
+                },
+                {
+                    bloco: "Bloco 4",
+                    dias: [
+                        { nome: "Dia 22", tarefas: ["#F092", "#F093", "#F094"] },
+                        { nome: "Dia 23", tarefas: ["#F095", "#F096", "#F097", "#F098"] },
+                        { nome: "Dia 24", tarefas: ["#F099", "#F100", "#F101", "#F102"] },
+                        { nome: "Dia 25", tarefas: ["#F103", "#F104", "#F105"] },
+                        { nome: "Dia 26", tarefas: ["#F106", "#F107", "#F108", "#F109"] },
+                        { nome: "Dia 27", tarefas: ["#F110", "#F111", "#F112"] },
+                        { nome: "Dia 28", tarefas: ["#F113", "#F114", "#F115", "#F116"] }
+                    ]
+                },
+                {
+                    bloco: "Bloco 5",
+                    dias: [
+                        { nome: "Dia 29", tarefas: ["#F117", "#F118", "#F119", "#F120"] },
+                        { nome: "Dia 30", tarefas: ["#F121", "#F122", "#F123", "#F124"] },
+                        { nome: "Dia 31", tarefas: ["#F125", "#F126", "#F127", "#F128"] },
+                        { nome: "Dia 32", tarefas: ["#F129", "#F130", "#F131", "#F132"] },
+                        { nome: "Dia 33", tarefas: ["#F133", "#F134", "#F135", "#F136"] },
+                        { nome: "Dia 34", tarefas: ["#F137", "#F138", "#F139", "#F140", "#F141"] }
+                    ]
+                },
+                {
+                    bloco: "Bloco 6",
+                    dias: [
+                        { nome: "Dia 35", tarefas: ["#F142", "#F143", "#F144", "#F145"] },
+                        { nome: "Dia 36", tarefas: ["#F146", "#F147", "#F148"] },
+                        { nome: "Dia 37", tarefas: ["#F149", "#F150", "#F151", "#F152"] },
+                        { nome: "Dia 38", tarefas: ["#F153", "#F154", "#F155"] },
+                        { nome: "Pitstop #2 🏁", tarefas: ["#F156", "#F157"] },
+                        { nome: "Pitstop 🏁", tarefas: ["#F158"] }
+                    ]
+                }
+            ]
+        };
+
+        // State management using in-memory objects
+        const taskStates = {}; // Track completed tasks
+        const blocosExpanded = {}; // Track expanded/collapsed blocos
+
+        // Initialize all blocos as expanded
+        appData.blocos.forEach((bloco, index) => {
+            blocosExpanded[index] = true;
+        });
+
+        // Initialize task states
+        appData.blocos.forEach(bloco => {
+            bloco.dias.forEach(dia => {
+                dia.tarefas.forEach(tarefa => {
+                    taskStates[tarefa] = false;
+                });
+            });
+        });
+
+        // Render the application
+        function renderApp() {
+            const container = document.getElementById('blocos-container');
+            container.innerHTML = '';
+
+            appData.blocos.forEach((bloco, blocoIndex) => {
+                const blocoElement = createBlocoElement(bloco, blocoIndex);
+                container.appendChild(blocoElement);
+            });
+
+            updateGlobalStats();
+        }
+
+        // Create bloco element
+        function createBlocoElement(bloco, blocoIndex) {
+            const blocoDiv = document.createElement('div');
+            blocoDiv.className = `bloco-card bloco-${blocoIndex + 1}`;
+
+            // Calculate progress for this bloco
+            const totalTasks = bloco.dias.reduce((sum, dia) => sum + dia.tarefas.length, 0);
+            const completedTasks = bloco.dias.reduce((sum, dia) => {
+                return sum + dia.tarefas.filter(tarefa => taskStates[tarefa]).length;
+            }, 0);
+            const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            blocoDiv.innerHTML = `
+                <div class="bloco-header" onclick="toggleBloco(${blocoIndex})">
+                    <div class="bloco-title">
+                        <h2>${bloco.bloco}</h2>
+                        <span class="bloco-toggle ${blocosExpanded[blocoIndex] ? '' : 'collapsed'}">▼</span>
+                    </div>
+                    <div class="bloco-progress">
+                        ${completedTasks} / ${totalTasks} concluídas
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progressPercent}%"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bloco-content ${blocosExpanded[blocoIndex] ? '' : 'collapsed'}">
+                    ${bloco.dias.map(dia => createDiaHTML(dia)).join('')}
+                </div>
+            `;
+
+            return blocoDiv;
+        }
+
+        // Create day HTML
+        function createDiaHTML(dia) {
+            const isPitstop = dia.nome.includes('Pitstop');
+            return `
+                <div class="dia">
+                    <div class="dia-nome ${isPitstop ? 'pitstop' : ''}">${dia.nome}</div>
+                    <div class="tarefas-container">
+                        ${dia.tarefas.map(tarefa => createTarefaHTML(tarefa)).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // Create task HTML
+        function createTarefaHTML(tarefa) {
+            const isCompleted = taskStates[tarefa];
+            return `
+                <div class="tarefa ${isCompleted ? 'completed' : ''}" onclick="toggleTask('${tarefa}')">
+                    <input type="checkbox" ${isCompleted ? 'checked' : ''} onchange="event.stopPropagation(); toggleTask('${tarefa}')">
+                    <span class="tarefa-text">${tarefa}</span>
+                </div>
+            `;
+        }
+
+        // Toggle task completion
+        function toggleTask(taskId) {
+            taskStates[taskId] = !taskStates[taskId];
+            
+            // Add animation class for new completions
+            const taskElement = document.querySelector(`[onclick="toggleTask('${taskId}')"]`);
+            if (taskStates[taskId] && taskElement) {
+                taskElement.classList.add('just-completed');
+                setTimeout(() => {
+                    taskElement.classList.remove('just-completed');
+                }, 400);
+            }
+            
+            renderApp();
+        }
+
+        // Toggle bloco expand/collapse
+        function toggleBloco(blocoIndex) {
+            blocosExpanded[blocoIndex] = !blocosExpanded[blocoIndex];
+            renderApp();
+        }
+
+        // Update global statistics
+        function updateGlobalStats() {
+            const totalTasks = Object.keys(taskStates).length;
+            const completedTasks = Object.values(taskStates).filter(Boolean).length;
+            const remainingTasks = totalTasks - completedTasks;
+            const completionPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+            document.getElementById('total-tasks').textContent = totalTasks;
+            document.getElementById('completed-tasks').textContent = completedTasks;
+            document.getElementById('remaining-tasks').textContent = remainingTasks;
+            document.getElementById('completion-percentage').textContent = `${completionPercentage}%`;
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', function() {
+            renderApp();
+        });
+
+        // Make functions globally accessible
+        window.toggleTask = toggleTask;
+        window.toggleBloco = toggleBloco;
+    </script>
+</body>
+</html>
